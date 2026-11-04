@@ -33,6 +33,8 @@ Model-learning
 | 2026-10-29 | 全原子模型解题思路归类（AF3/Mol-1/RFD4-Proteina/OpenDDE/AnewOmni/ATOMICA） | 联合分析 | 已完成 | 团队共同学习 | [联合分析/全原子模型解题思路归类分析](联合分析/全原子模型解题思路归类分析.md) |
 | 2026-11-03 | 推理时优化机制对比（AnewOmni 抗体 pipeline × RFD4-Proteina 奖励搜索） | 联合分析 | 已完成 | 团队共同学习 | [联合分析/推理时优化机制对比](联合分析/推理时优化机制对比-AnewOmni与RFD4-Proteina.md) |
 | 2026-11-04 | AlphaFold 3（全原子结构预测：表征、trunk、diffusion、置信头） | 单模型 | 初稿 | 团队共同学习 | [模型篇章/AlphaFold3](模型篇章/AlphaFold3/README.md) |
+| 2026-11-04 | Proteína（Proteina，Cα-only 主链 flow 生成） | 单模型 | 学习中 | 团队共同学习 | [模型篇章/Proteina](模型篇章/Proteina/README.md) |
+| 2026-11-04 | AnewOmni（全原子生成：atom-to-block + 潜空间 EPT） | 单模型 | 已完成 | 团队共同学习 | [模型篇章/AnewOmni](模型篇章/AnewOmni/README.md) |
 
 ## 记录流程
 
@@ -47,3 +49,5 @@ Model-learning
 - 2026-10-29：新增联合分析「全原子模型解题思路归类分析」（合并本地对话记录与技术栈对比报告，含综述写作章节建议与事实性备注）。
 - 2026-11-03：新增联合分析「推理时优化机制对比（AnewOmni × RFD4-Proteina）」（两份官方文档已核实；核心结论：机制存在 ≠ 计算扩展收益）。
 - 2026-11-04：新增单模型篇章「AlphaFold 3」（Nature 正文、PMC 补充材料与官方代码交叉核验；核心判断：原子级 token 是化学接口升级，不是骨架精度开关；初稿，待核实项集中在训练数据清洗与部分指标精确值）。
+- 2026-11-04：新增单模型篇章「Proteína」（arXiv 2503.00710 与官方仓库交叉核验；核心判断：Cα 单点主链生成，不是全原子，也无侧链 latent 与能量项；命名沿革与旧称归属见 §1.1）。
+- 2026-11-04：新增单模型篇章「AnewOmni」（bioRxiv 正文与官方仓库交叉核验；核心判断：全原子输出成立，但侧链构象采样不成立，抗体端到端依赖 60 轮 cofold 外循环）。
