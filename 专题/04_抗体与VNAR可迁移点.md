@@ -1,7 +1,7 @@
 ---
 topic: 抗体与 VNAR 可迁移点
 axis: 抗体应用
-related_models: [AlphaFold3, Boltz-1, Boltz-2, Chai-1, RFAA, Chroma, IgGM, AntiBMPNN, AbMPNN, AnewOmni, BoltzGen, APM, TorchCraft, SeedProteo, Proteina-Complexa, SAbDab2]
+related_models: [AlphaFold3, Boltz-1, Boltz-2, Chai-1, RFAA, Chroma, IgGM, AntiBMPNN, AbMPNN, AnewOmni, BoltzGen, APM, TorchCraft, SeedProteo, Proteina-Complexa, SAbDab2, Pallatom2]
 status: 初稿
 verified_at: 2026-11-04
 ---
@@ -9,7 +9,7 @@ verified_at: 2026-11-04
 # 抗体与 VNAR 可迁移点
 
 > **研究轴**：抗体/纳米抗体场景下的可复用模块、数据、指标与工程约束
-> **关联模型篇章**：[01_全原子表示与生成范式](01_全原子表示与生成范式.md)、[02_训练数据构成与切分](02_训练数据构成与切分.md)、[03_评测体系与可复现性](03_评测体系与可复现性.md)
+> **关联模型篇章**：[01_全原子表示与生成范式](01_全原子表示与生成范式.md)、[02_训练数据构成与切分](02_训练数据构成与切分.md)、[03_评测体系与可复现性](03_评测体系与可复现性.md)、[模型篇章/Pallatom2](../模型篇章/Pallatom2/README.md)
 > **记录人**：待填
 > **最后更新**：2026-11-04
 
@@ -84,6 +84,17 @@ verified_at: 2026-11-04
 - 表征补丁：RFAA 的 46 种元素 token、键级 token、显式 R/S token（用于非经典 Cys 与修饰残基）。
 - 条件接口：BoltzGen／Chai-1 的约束语言（pocket／SS／共价键／restraint）、AnewOmni 的 graph prompt（环化／motif／非天然残基／锚定）、IgGM 的表位 + 掩码模式。
 - 评测协议：SAbDab2 `ab-split` / `ab-ag-split`（按克隆／抗原切分，而非结构随机切分）。
+
+### 3.4 局部重设计路径（Pallatom2，本轮新增）
+
+> 以下不在主文档 §6.1 的原始四点内，属本轮新增的可迁移路径；只列做法与边界，不复制模型篇章整节。
+
+- **做法**：以已有 VNAR–靶标复合物为起点，`norepack` 锁住框架侧链、`redesign` 放开 CDR 区域，再做 partial diffusion（t=0.2 起步、t=0.3 加强）；筛选用 `min-ipAE + ptm-binder`，小批量 BLI 验证。条件系统把「二级结构」注入 residue 级、「固定侧链朝向」注入 atom pair 级，因此能同时约束框架与 CDR 的局部几何。【核实】
+- **先例**：纳米抗体 PB-272（起始 KD 2,000 nM、无结合）→ 改造 CDR 界面生成 500 个候选 → 提名 10 个 → 7 个表达并上 BLI → PB-276 4.31 nM、PB-277 5.93 nM。单 scaffold、单案例，属**存在性证明**，不是可重复率。【核实：Pallatom2 技术报告 p.22–23】
+- **两条禁止用法**：
+  1. **不是 de novo VNAR 生成器**：训练语料是 AFDB／TED 的单域／多域球状蛋白，**不含 Ig 折叠**，也没有 VNAR 条件接口；84 个 VNAR 结构不足以从零训练或可靠留出。【推断，依据 02 的语料描述 + 本篇 §3.2】
+  2. **不是 KD 预测器**：`ptm-binder` 是 binder **单链折叠置信度**，不是界面或亲和力置信度；界面不确定性要看 `min-ipAE`，亲和力只能靠湿实验。【核实】
+- **完整论证与数据出处**：[模型篇章/Pallatom2](../模型篇章/Pallatom2/README.md) §4、§6。
 
 ---
 
