@@ -2,7 +2,7 @@
 
 > **涉及的模型**：AnewOmni（抗体/纳米抗体设计 pipeline）· RFD4-Proteina（reward-guided search）
 > **记录人**：团队共同学习
-> **最后更新**：2026-11-04（追加订正说明；正文未改）
+> **最后更新**：2026-11-06（订正说明逐条标注；正文未改）
 > **材料来源**：本地学习对话 + 两份官方文档（AnewOmni `docs/antibody-pipeline.md`、RFD4-Proteina 官网 concepts/search，均已于 2026-11-03 核实）
 
 ---
@@ -13,20 +13,20 @@
 
 | 被证伪的结论 | 核查结果 |
 | --- | --- |
-| 主链显式 + 侧链压成 32 维 latent | arXiv 2503.00710 与官方仓库 `NVIDIA-BioNeMo/proteina` 均 0 命中。Proteina 是 **Cα 单点表示**（`x∈R^{3L}`，Atom37 只有 index 1 非零），无侧链 latent、无解码器。 |
-| PackBench 侧链打包误差约 0.82 Å | 两处一手来源均无此数字，也无 PackBench 评测记录。 |
-| 解码受 Rosetta 能量函数显式监督 | 全文 "Rosetta" 仅 1 次且出现在基线名 "RoseTTAFold"；仓库无 rosetta 模块；可设计性链路用 ESMFold。该说法对应的是 2026 年模型的微调阶段（可微能量损失，非 conditioner）。 |
-| beam search / reward guided search 属于 Proteina | 该机制属于 2026 年模型（内部 recycling + 外部 checkpoint beam search、oracle refold）。Proteina 本身不含搜索或奖励环节。 |
+| 主链显式 + 侧链压成 32 维 latent | arXiv 2503.00710 与官方仓库 `NVIDIA-BioNeMo/proteina` 均 0 命中。Proteina 是 **Cα 单点表示**（`x∈R^{3L}`，Atom37 只有 index 1 非零），无侧链 latent、无解码器。**（已订正于 2026-11-06）** |
+| PackBench 侧链打包误差约 0.82 Å | 两处一手来源均无此数字，也无 PackBench 评测记录。**（已订正于 2026-11-06）** |
+| 解码受 Rosetta 能量函数显式监督 | 全文 "Rosetta" 仅 1 次且出现在基线名 "RoseTTAFold"；仓库无 rosetta 模块；可设计性链路用 ESMFold。该说法对应的是 2026 年模型的微调阶段（可微能量损失，非 conditioner）。**（已订正于 2026-11-06）** |
+| beam search / reward guided search 属于 Proteina | 该机制属于 2026 年模型（内部 recycling + 外部 checkpoint beam search、oracle refold）。Proteina 本身不含搜索或奖励环节。**（已订正于 2026-11-06）** |
 
 **证据**：arXiv 2503.00710 全文与 `NVIDIA-BioNeMo/proteina` 仓库逐项检索，"32 维 latent""0.82""Rosetta""beam search" 均 0 命中；而 `rfd4-proteina.org` 的 `concepts/metric-guidance`、`concepts/search`、`concepts/metrics` 与论文 PDF 片段可以逐条对应上述机制。2026 年模型确实有 `local_latents` 接口，但"32 维""0.82 Å"这两个具体数值在两处一手来源中均未见披露。
 
-**本文件状态**：正文写于 2026-11-03，标题与行文沿用 "RFD4-Proteina" 旧称，但正文并未断言上述四条；它把 RFD4-Proteina 描述为 `rfd4-proteina.org` 的 reward guided search，方向与本订正一致，故正文不改写，仅作旧称传播源的标注。真正的错误内容落在另一篇，需按下表重写：
+**本文件状态**：正文写于 2026-11-03，标题与行文沿用 "RFD4-Proteina" 旧称，但正文并未断言上述四条；它把 RFD4-Proteina 描述为 `rfd4-proteina.org` 的 reward guided search，方向与本订正一致，故正文不改写，仅作旧称传播源的标注。真正的错误内容落在另一篇，已按 2026-11-06 的订正重写：
 
-| 文件 | 需重写的段落 |
+| 文件 | 原需重写的段落（已于 2026-11-06 重写） |
 | --- | --- |
 | `联合分析/全原子模型解题思路归类分析.md` | §3 路线 ② 标题「连续隐空间压缩（RFD4-Proteina / AnewOmni）」；路线 ② 正文「主链保持显式坐标（锚原子 N/CA/C/O），仅把侧链压成 32 维 latent … Rosetta 能量函数显式监督 … PackBench 侧链打包误差约 0.82 Å」；对比表中「全原子解题思路：主链显式+侧链 32D latent」「物理约束：**显式**（Rosetta 监督）」「侧链精度：SOTA（~0.82 Å PackBench）」「RFD4-Proteina：主链量坐标 + 侧链压 32D」四行 |
 
-处理原则：原文一律保留以便追溯；新结论以本说明与 [`模型篇章/Proteina/README.md`](../模型篇章/Proteina/README.md) §1.1、§3.7 为准。
+处理原则：错误表述保留于本说明与 git 历史以便追溯；新结论以本说明、订正后的《全原子模型解题思路归类分析》与 [`模型篇章/Proteina/README.md`](../模型篇章/Proteina/README.md) §1.1、§3.7 为准。
 
 ---
 
