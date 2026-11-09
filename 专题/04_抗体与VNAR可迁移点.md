@@ -49,6 +49,7 @@ verified_at: 2026-11-04
 | Proteina-Complexa（2026） | 全原子 mini-protein／peptide binder，非 Ig | 不做抗体；不能直接当抗体模型用 |
 | RFAA（2024） | 元素／键级／手性 token 体系可处理非标准残基、共价修饰 | 抗体不是其主战场；大体系算不动 |
 | Chroma（2023） | 可组合能量 conditioner（对称性／子结构／形状），免重训切换条件 | 成功率约 3%；不支持小分子 |
+| ATOMICA（2025） | 重原子界面表征，可把 VNAR-抗原直接当蛋白-蛋白界面编码，用 `z_interface` 做表位相似性检索、用 ATOMICAScore 做接触位点归因 | 非生成式；无氢／电荷／键级；CDR 柔性未建模；**Q-BioLiP 中抗体/纳米抗体占比未披露**，只能 zero-shot 用通用权重 |
 
 ---
 
