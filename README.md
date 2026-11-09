@@ -36,6 +36,7 @@ Model-learning
 | 2026-11-04 | Proteína（Proteina，Cα-only 主链 flow 生成） | 单模型 | 学习中 | 团队共同学习 | [模型篇章/Proteina](模型篇章/Proteina/README.md) |
 | 2026-11-04 | AnewOmni（全原子生成：atom-to-block + 潜空间 EPT） | 单模型 | 已完成 | 团队共同学习 | [模型篇章/AnewOmni](模型篇章/AnewOmni/README.md) |
 | 2026-11-06 | Pallatom2（Atom14 全重原子坐标扩散：条件控制、长链／多聚体、binder 湿实验） | 单模型 | 已完成 | 团队共同学习 | [模型篇章/Pallatom2](模型篇章/Pallatom2/README.md) |
+| 2026-11-06 | OpenDDE（AF3 家族全原子共折叠：结构 token 推理 + 坐标扩散；抗体-抗原基准） | 单模型 | 已完成 | 团队共同学习 | [模型篇章/OpenDDE](模型篇章/OpenDDE/README.md) |
 
 ## 记录流程
 
@@ -53,3 +54,4 @@ Model-learning
 - 2026-11-04：新增单模型篇章「Proteína」（arXiv 2503.00710 与官方仓库交叉核验；核心判断：Cα 单点主链生成，不是全原子，也无侧链 latent 与能量项；命名沿革与旧称归属见 §1.1）。
 - 2026-11-04：新增单模型篇章「AnewOmni」（bioRxiv 正文与官方仓库交叉核验；核心判断：全原子输出成立，但侧链构象采样不成立，抗体端到端依赖 60 轮 cofold 外循环）。
 - 2026-11-06：新增单模型篇章「Pallatom2」（58 页技术报告与一代 Pallatom 公开代码交叉核验；核心判断：Atom14 全重原子笛卡尔坐标去噪，无 frame／latent／MSA；v2 采样器与训练集切分未披露；同步 01 §6 覆盖矩阵与对比表 CSV，并在 02／03／04 三处加交叉引用）。
+- 2026-11-06：新增单模型篇章「OpenDDE」（arXiv 2607.03787v1、Apache-2.0 代码与 HF 权重交叉核验；核心判断：AF3 家族连续坐标扩散，structural token 是连续隐节点而非离散 ID，故由路线 ③ 订正至路线 ①；排序器是当前瓶颈，top-rank 与 oracle 差 13–14 个百分点；同步 01 §6 覆盖矩阵与对比表 CSV，并在 02／03／04 三处加交叉引用）。
