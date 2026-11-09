@@ -44,6 +44,7 @@ verified_at: 2026-11-04
 | BoltzGen（2025） | design as structure prediction；报纳米抗体湿实验 | 需靶标结构；各模态成功率差异大 |
 | APM（2025） | 抗原→CDR-H3、受体→肽的逐链设计；残基 + 4 个侧链扭转角 | 无湿实验，指标全为计算代理 |
 | TorchCraft（2026） | 冻结 AF3 做 test-time 反传优化，报 4/4 VHH 有结合 | 单靶耗时；置信度自洽偏差；无训练 |
+| OpenDDE（2026） | AF3 家族全原子共折叠，JSON 支持任意链（含 VHH 案例）；另有 abag 专用 checkpoint | 非序列设计；abag 在纳米抗体上劣于 general（内部 3/3 seed）；VNAR 占比未披露，只能 zero-shot |
 | SeedProteo（2026） | AF3 式 atom14 扩散 + MRF 解码，报 2 靶 pM 级 | 仅 2 靶湿实验，证据薄【未核实】 |
 | Proteina-Complexa（2026） | 全原子 mini-protein／peptide binder，非 Ig | 不做抗体；不能直接当抗体模型用 |
 | RFAA（2024） | 元素／键级／手性 token 体系可处理非标准残基、共价修饰 | 抗体不是其主战场；大体系算不动 |
@@ -119,6 +120,8 @@ verified_at: 2026-11-04
 - **采样预算被抗体任务放大**：AF3 论文默认 5 seeds × 5 samples = 25 个样本取 top-1；抗体任务约需 1000 seeds 才饱和。【论文自称】这一点直接抬高湿实验前筛选成本一个量级。【推断】
 - **推理期优化可作低成本替代**：TorchCraft 用冻结 AF3 做 test-time 反传，报 4/4 minibinder、4/4 VHH 有结合；代价是单靶耗时与置信度自洽偏差。
 - **没有同一 VNAR 靶标的头对头湿实验**：现有通用全原子模型报 in-silico designability，抗体模型报 DockQ 与湿实验 hit rate，两者目前不可直接比较。
+- **专用 checkpoint 未必迁移**：OpenDDE 的 `opendde_abag` 在内部纳米抗体＋MC4R 测试（3 seed，`cycle=10/step=200/use_msa=false`）上 3/3 劣于 general（pLDDT 63.56→50.04，ipTM 0.313→0.201）；提示按常规 Ab-Ag 界面强化的权重可能对 VNAR 过拟合，默认应先用 general，abag 只做 A/B。配方未披露，结论仅限该内部测试。【核实·内部记录，未复现】
+- **上下文并行只救大体系**：OpenDDE 的 CP4（4 卡）在 N ≤ 900 token 时比单卡更慢、峰值显存更高（N=100 时 15,549 vs 4,959 MiB），N ≥ 1200 才占优，真实价值是让 N=2000 不 OOM。VNAR-抗原复合物多在数百 token，开 CP4 属负优化。【核实：Appendix C Table 3】
 
 ---
 
@@ -137,6 +140,7 @@ verified_at: 2026-11-04
 | BoltzGen | design as prediction；纳米抗体湿实验 | 统一约束语言（位点／SS／共价键／构象） | 26 靶；纳米抗体 60% 靶有 hit【论文自称】 | 需靶标结构；模态差异大 |
 | APM | 抗原→CDR-H3 | 残基 + 4 侧链扭转角；逐链条件 | RAbD 恢复／RMSD | 无湿实验；折叠精度不及专用预测器 |
 | TorchCraft | 冻结 AF3 的 test-time 优化 | 序列 logits + CDR 限定；无需训练 | 4/4 minibinder、4/4 VHH | 单靶耗时；置信度自洽偏差 |
+| OpenDDE | AF3 家族全原子共折叠（含抗体-抗原）；Ab-Ag benchmark 有 top-rank／oracle 双线 | structural token 角色分解；shape-complementarity loss；统一 masked 生成 | DockQ ≥0.23；top-rank 与 oracle 需同时报 | 非序列设计；abag checkpoint 在纳米抗体上劣于 general【内部记录】；preview 跨版本不复现 |
 | SeedProteo | AF3 式 atom14 + MRF 解码 | 靶标口袋条件 | 2 靶 70–80% hit、pM 级【未核实】 | 仅 2 靶，证据薄 |
 | Proteina-Complexa | 全原子 binder（非 Ig） | 潜空间 flow matching + test-time search | 133 靶、>1M 候选、最高 63.5% hit【论文自称】 | 不做抗体 |
 
