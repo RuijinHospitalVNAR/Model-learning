@@ -2,14 +2,14 @@
 
 > **涉及的模型**：AnewOmni（抗体/纳米抗体设计 pipeline）· RFD4-Proteina（reward-guided search）
 > **记录人**：团队共同学习
-> **最后更新**：2026-11-06（订正说明逐条标注；正文未改）
+> **最后更新**：2026-11-10（订正说明逐条标注；正文未改；技术报告已到位并补记）
 > **材料来源**：本地学习对话 + 两份官方文档（AnewOmni `docs/antibody-pipeline.md`、RFD4-Proteina 官网 concepts/search，均已于 2026-11-03 核实）
 
 ---
 
 ## 订正说明（2026-11-04 追加，原文保留可追溯）
 
-核查发现旧笔记把两个模型混为一谈：2025 年的 **Proteina**（arXiv 2503.00710，ICLR 2025 Oral）与 2026 年 `rfd4-proteina.org` 上的**另一个模型**（Baker Lab × NVIDIA GenAIR，接口含 `bb_ca` + `local_latents`，reward guided search，AF3/OF3 oracle refold）。以下四条曾记在 Proteina 名下的"公认属性"**归属被证伪**（不是说机制在 2026 年模型上也不存在）：
+核查发现旧笔记把两个模型混为一谈：2025 年的 **Proteina**（arXiv 2503.00710，ICLR 2025 Oral）与 2026 年 `rfd4-proteina.org` 上的**另一个模型**（即 `RosettaCommons/RFD4-Proteina` 仓库，Baker Lab × NVIDIA GenAIR，接口含 `bb_ca` + `local_latents`，reward guided search，AF3/OF3 oracle refold；技术报告已随仓库发布）。以下四条曾记在 Proteina 名下的"公认属性"**归属被证伪**（不是说机制在 2026 年模型上也不存在）：
 
 | 被证伪的结论 | 核查结果 |
 | --- | --- |
@@ -18,7 +18,7 @@
 | 解码受 Rosetta 能量函数显式监督 | 全文 "Rosetta" 仅 1 次且出现在基线名 "RoseTTAFold"；仓库无 rosetta 模块；可设计性链路用 ESMFold。该说法对应的是 2026 年模型的微调阶段（可微能量损失，非 conditioner）。**（已订正于 2026-11-06）** |
 | beam search / reward guided search 属于 Proteina | 该机制属于 2026 年模型（内部 recycling + 外部 checkpoint beam search、oracle refold）。Proteina 本身不含搜索或奖励环节。**（已订正于 2026-11-06）** |
 
-**证据**：arXiv 2503.00710 全文与 `NVIDIA-BioNeMo/proteina` 仓库逐项检索，"32 维 latent""0.82""Rosetta""beam search" 均 0 命中；而 `rfd4-proteina.org` 的 `concepts/metric-guidance`、`concepts/search`、`concepts/metrics` 与论文 PDF 片段可以逐条对应上述机制。2026 年模型确实有 `local_latents` 接口，但"32 维""0.82 Å"这两个具体数值在两处一手来源中均未见披露。
+**证据**：arXiv 2503.00710 全文与 `NVIDIA-BioNeMo/proteina` 仓库逐项检索，"32 维 latent""0.82""Rosetta""beam search" 均 0 命中；而 `rfd4-proteina.org` 的 `concepts/metric-guidance`、`concepts/search`、`concepts/metrics` 与技术报告可以逐条对应上述机制。2026 年模型确实有 `local_latents` 接口：**"32 维"成立，但为残基级隐变量（每 token = Cα/C1′ 锚点 + 32 维 latent），不是"侧链专属"**；**"0.82 Å"不成立**——全仓库与全文检索只命中 PLACER 的 AUROC 0.82，PackBench 真实口径是 MolProbity 1.70 vs LigandMPNN 1.99（2026-11-10 补记，依据技术报告 §4.3 与 PackBench 段）。
 
 **本文件状态**：正文写于 2026-11-03，标题与行文沿用 "RFD4-Proteina" 旧称，但正文并未断言上述四条；它把 RFD4-Proteina 描述为 `rfd4-proteina.org` 的 reward guided search，方向与本订正一致，故正文不改写，仅作旧称传播源的标注。真正的错误内容落在另一篇，已按 2026-11-06 的订正重写：
 
@@ -96,8 +96,8 @@
 ## 6. 事实性备注
 
 - AnewOmni pipeline 描述与 `bytedance/AnewOmni` 仓库 `docs/antibody-pipeline.md`（main 分支，2026-11-03 抓取）逐条一致；`n_loser_up`、迭代预算、ranking 键名为文档新增细节，原对话未提及；
-- RFD4-Proteina 搜索机制与官网 `concepts/search.html` 一致；recycling/thinking 预算的表述来自官网 workflow 页，未逐字复核，引用前建议再查；
-- RFD4-Proteina 的公开论文出处仍待补全（见《全原子模型解题思路归类分析》§8）。
+- RFD4-Proteina 搜索机制与官网 `concepts/search.html` 一致；recycling/thinking 预算的表述已由仓库代码与技术报告核实：内部 recycling 60 步去噪 × 1–6 次 trunk（low/medium/high = 120/180/300 次 trunk pass），外部 `BeamSearchStrategy` 独立于主干（2026-11-10 更新）；
+- RFD4-Proteina 的公开论文出处已补全：《Biomolecular design through latent reasoning with RFD4-Proteina》，Corley、Didi 等，2026 预印本（未经同行评审，CC BY 4.0），PDF 随 `RosettaCommons/RFD4-Proteina` 仓库发布。
 
 ## 7. 参考资料
 

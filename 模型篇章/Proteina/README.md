@@ -30,9 +30,9 @@ verified_at: 2026-11-04
 | Proteína（Proteina） | arXiv 2503.00710，ICLR 2025 Oral，NVIDIA；自述为 "large-scale flow-based protein **backbone** generator" | 本篇对象 | 【核实：摘要与 §3.2】 |
 | La-Proteina | arXiv 2507.09466，ICLR 2026；Cα 显式 + 每残基 8 维 latent + VAE 解码 | 同一条线的**下一步**，不是同一个模型 | 【核实：La-Proteina §3.1、§3.2.1】 |
 | Proteina-Complexa | arXiv 2603.27950，ICLR 2026；全原子 binder 设计 + 推理期搜索 | 同一条线的**分支**（binder 任务） | 【核实：Complexa 摘要、§3.1】 |
-| RFD4-Proteina | `rfd4-proteina.org`，Baker Lab × NVIDIA GenAIR，"next generation sequence structure co-design model"，覆盖 protein/RNA/DNA/小分子复合物 | 旧称实际所指；与 Proteina 共享血缘，但能力与接口不同 | 【核实：rfd4-proteina.org 首页、`concepts/metric-guidance`、`concepts/search`】 |
+| RFD4-Proteina | `RosettaCommons/RFD4-Proteina`（`rfd4-proteina.org`），Baker Lab × NVIDIA GenAIR，"next generation sequence structure co-design model"，覆盖 protein/RNA/DNA/小分子复合物；完整技术仓库（1317 blob，训练＋推理＋search，BSD-3-Clause），仓库内托管 54 MB 技术报告 PDF（CC BY 4.0） | 旧称实际所指；接的是 La-Proteina 的 partial-latent 线，与 Proteina 无直接技术血缘；主基线为 Proteina-Complexa | 【核实：RosettaCommons 仓库、技术报告 PDF、`concepts/metric-guidance`、`concepts/search`】 |
 
-因此 `aliases` 只收录真正等价的名字（`Proteina`、`Proteína`），不把 `RFD4-Proteina` 记为别名——它指代的是上表最后一行那个 2026 年模型，只是旧笔记的错误挂靠。正文提到旧称时一律写明指代。凡旧笔记中"32 维侧链 latent""0.82 Å 侧链误差""Rosetta 能量监督""beam search / oracle reward"这几条，均不得记在 Proteina 名下（归属裁决见 §3.7 与 §5.3）。【核实 + 推断】
+因此 `aliases` 只收录真正等价的名字（`Proteina`、`Proteína`），不把 `RFD4-Proteina` 记为别名——它指代的是上表最后一行那个 2026 年模型，只是旧笔记的错误挂靠。正文提到旧称时一律写明指代。凡旧笔记中"32 维侧链 latent""0.82 Å 侧链误差""Rosetta 能量监督""beam search / oracle reward"这几条，均不得记在 Proteina 名下（归属裁决见 §3.7 与 §5.3）。其中"32 维"成立但为**残基级**隐变量（非侧链专属），"0.82 Å"查无此数——实际是 PLACER 的 AUROC 0.82，PackBench 真实口径为 MolProbity 1.70 vs LigandMPNN 1.99。【核实：RFD4-Proteina 技术报告 §4.3 与 PackBench 段；全仓库 `grep "0.82"` 无命中】
 
 ### 1.2 本次目标
 
@@ -175,7 +175,7 @@ v_ref = α · v_θ(x_t, t, ∅) + (1 − α) · v_weak(x_t, t, c)
 
 该说法在家族中的真实位置：
 
-- 旧称所指的 2026 年模型（旧笔记称 "RFD4-Proteina"，即 `rfd4-proteina.org` 上 Baker Lab × NVIDIA GenAIR 的那个模型）：微调阶段引入 Rosetta 能量损失，经 TMol 对**解码后的坐标**求导；报告平均每残基降低 1.07 kcal/mol、严重键角偏差减少 62%（相对只做重建的微调）。这是"可微能量损失"，属于训练期监督，不是 conditioner。【核实：rfd4-proteina.org 论文 PDF 片段；正文未通读】
+- 旧称所指的 2026 年模型（旧笔记称 "RFD4-Proteina"，即 `RosettaCommons/RFD4-Proteina` / `rfd4-proteina.org` 上 Baker Lab × NVIDIA GenAIR 的那个模型）：微调阶段在**解码器**（自编码器）上引入 Rosetta 能量损失，经 TMol 对解码后的坐标求导，**不是 denoiser 的条件项**；每残基能量 −0.18 → −1.25 kcal/mol（降幅约 1.07）、严重键角偏差减少 62%（相对只做重建的微调）。这是"可微能量损失"，属于训练期监督，不是 conditioner。【核实：仓库内技术报告 S4.3.1 与 Fig 3；2026-11-10 已通读全文】
 - Proteina-Complexa：把 Rosetta 定义的氢键能量作为**推理期可选 reward**（Tmol 实现，配置默认整块注释关闭）。这是"搜索目标"，不是训练损失。【核实：Complexa 仓库 `search/reward/rosetta_hbond.py` 与 config】
 
 三条路——训练期可微损失、推理期 reward、后处理过滤——都不在 Proteina 里。若沿用"Proteina 解码受 Rosetta 监督"的说法，会把一个 2026 年模型的设计选择误记到 2025 年模型上。
@@ -419,7 +419,7 @@ A：对 Proteina 不适用。它从未自称 all-atom，摘要首句即 backbone
 
 - La-Proteina, arXiv:2507.09466 — https://arxiv.org/html/2507.09466
 - Proteina-Complexa, arXiv:2603.27950 — https://arxiv.org/html/2603.27950 ；项目页 https://research.nvidia.com/labs/genair/proteina-complexa/
-- 旧称所指的 2026 年模型（旧笔记称 "RFD4-Proteina"，非本篇别名）文档：https://rfd4-proteina.org/latest/ （`concepts/metric-guidance`、`concepts/search`、`concepts/metrics`）；论文 PDF 片段 https://rfd4-proteina.org/assets/paper/RFD4-Proteina.pdf （本次未通读）
+- 旧称所指的 2026 年模型（旧笔记称 "RFD4-Proteina"，非本篇别名）：代码仓库 https://github.com/RosettaCommons/RFD4-Proteina （BSD-3-Clause，训练＋推理＋search 完整技术仓库）；项目文档 https://rfd4-proteina.org/latest/ （`concepts/metric-guidance`、`concepts/search`、`concepts/metrics`）；技术报告《Biomolecular design through latent reasoning with RFD4-Proteina》（Corley、Didi 等，2026 预印本，CC BY 4.0）PDF 随仓库发布于 `website/assets/paper/RFD4-Proteina.pdf`（54 MB，2026-11-10 已通读）
 
 **仓库内参照**
 
