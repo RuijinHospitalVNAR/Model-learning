@@ -1,5 +1,5 @@
 ---
-model: Proteína（Proteina）
+model: Proteina（Proteína）
 aliases: [Proteina, Proteína]
 family: 序列/结构设计（主链无条件生成；扩展到 motif scaffolding 与长链）
 granularity: 主链显式（仅 Cα，每残基 1 个三维点，即 3L 维；无 N/C/O，无残基 frame，无侧链，无 latent）

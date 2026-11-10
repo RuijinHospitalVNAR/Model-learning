@@ -1,5 +1,5 @@
 ---
-model: AlphaFold 3
+model: AlphaFold3（AlphaFold 3）
 aliases: [AF3, AlphaFold3]
 family: 结构预测
 granularity: 全原子坐标（聚合物残基 token + 配体每原子 token）
@@ -289,7 +289,7 @@ c_out(σ)  = σ · σ_data / sqrt(σ² + σ_data²)
 
 **与 RFAA / Boltz-1 / Chai-1 对比为什么必须重新校准**
 
-1. **切点**：AF3 2021-09-30；Boltz-1 同切点；Boltz-2 2023-06-01；Chai-1 未披露；RFAA 未明示统一时间切点。不同切点意味着测试结构可能已进训练集。【核实：专题 02 §2.1】
+1. **切点**：AF3 2021-09-30；Boltz-1 同切点；Boltz-2 2023-06-01；Chai-1 2021-01-12；RFAA 未明示统一时间切点。不同切点意味着测试结构可能已进训练集。【核实：专题 02 §2.1】
 2. **采样预算**：AF3 25 样本；Chai-1 默认 5 样本；RFAA 代码示例 T=100/200；Boltz 200 步 × 5 验证样本。样本数不同，top-1 精度不可直接比。【核实：专题 01 §2.4】
 3. **hit rate 分母**：AF3 是结构预测，分母是 benchmark 复合物数（如 PoseBusters 428）；RFAA/BoltzGen/AnewOmni 是设计/湿实验，分母是“每靶候选数 × 靶数”，命中定义、表达系统、筛选通量都不同。75% 与 63.5% 不能横比。【推断，依据专题 03 §2.3 与 §6】
 4. **指标实现**：PoseBusters 的 RMSD 是否对称校正、DockQ 版本、LDDT 对齐方式、界面残基定义，都会改变数字；必须统一实现。【推断】

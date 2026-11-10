@@ -39,7 +39,7 @@ verified_at: 2026-11-10
 | AlphaFold3（2024） | 抗体-抗原共折叠；AF3 系 atom-token + 坐标扩散的精度基准 | 结构预测而非生成；抗体任务约需 1000 seeds 才饱和【论文自称】 |
 | Boltz-1（2024） | 复现 AF3，支持 pocket 条件与 steering | 无模板；训练分辨率论文 9 Å vs 代码 4.0 Å |
 | Boltz-2（2025） | AF3 式骨干 + affinity 头 | 切点 2023-06-01，亲和力指标不可与 AF3 横比 |
-| Chai-1（2024） | 单序列／ESM embedding／restraint，抗体场景可少依赖 MSA | 训练切点未披露【未核实】 |
+| Chai-1（2024） | 单序列／ESM embedding／restraint，抗体场景可少依赖 MSA | 训练切点 2021-01-12【核实：论文三处】 |
 | IgGM（2025） | 唯一开放权重、支持 nanobody 的抗体 CDR 共设计；抗原 + epitope + mask | 只生成 Cα + SO(3) frame，**无侧链**，不算全原子；抗原刚性假设 |
 | AntiBMPNN／AbMPNN（2025） | 抗体逆折叠序列设计，recovery 高 | 主链级（N/CA/C/O）；训练集规模未披露【未核实】 |
 | AnewOmni（2026） | graph prompt 支持纳米抗体／肽／小分子统一建模；报 KRAS G12D 纳米抗体湿实验 | 预印本；抗体仅 CDR／纳米抗体；低通量筛选；侧链为 block/VAE 解码 |
@@ -163,7 +163,7 @@ verified_at: 2026-11-10
 1. **abag 专用权重在纳米抗体上是负迁移。** 数据见 §5.1 末两条：`opendde_abag` 在内部纳米抗体测试上 3/3 劣于 general。**处理边界**：默认 general，abag 只做 A/B；且该结论只覆盖一个内部测试、配方未披露，不能外推成"abag 权重普遍无效"。【核实·内部记录，未复现】
 2. **VNAR 的 MSA 稀缺会让 MSA 依赖型模型退化。** 鲨鱼序列在 UniRef／ColabFold 中代表性弱，MSA 深度与多样性均低于人源 VHH，AF3／Boltz 系的有效性随之下降；这也是 Chai-1 单序列模式与 OpenDDE `use_msa=false` 在 VNAR 上值得优先试的原因。**处理边界**：报结果必须同时给"有 MSA／无 MSA"两组，否则无法区分是模型不行还是 MSA 不行。【推断，依据 MSA 依赖机制 + Chai-1 单序列结论】
 3. **非经典 Cys 与长 CDR3 落在多数模型的表达边界之外。** VNAR 无 CDR2、CDR3 更长、额外 Cys 形成非经典二硫键；而 01 §6 里逐原子模型的化学语义只到"元素 + 坐标"，Pallatom2 与 ATOMICA 明确无键级／无电荷。**处理边界**：三选一——用带键级／手性的表示（RFAA 的 46 元素 + 键级 + R/S token）、把二硫键写成显式共价约束（BoltzGen／Chai-1 的约束语言）、或在评测里单独统计二硫键几何与手性违规率（AF3 自报 4.4% 手性违规）。三者至少要有一项，否则"全原子"只是原子数够、化学不成立。
-4. **切点泄漏会直接污染 AF3 系评测。** AF3／Boltz-1 训练切点 2021-09-30，Boltz-2 为 2023-06-01，Chai-1 与 OpenDDE 未披露。SAbDab2 v0.3.0（2026-10-13）收录的 84 个 VNAR 中，**首次 release 早于对应切点的结构已被训练集见过**，在其上算 DockQ 会系统性偏高；晚于切点的才是干净子集。**处理边界**：按每条链的 PDB 首次 release date 分层，对每个模型按其切点分别报"切点前／切点后"两栏并给分母——切点后子集可能只有个位数，单栏报均值等于没有结论。【核实：各模型切点；推断：泄漏方向】
+4. **切点泄漏会直接污染 AF3 系评测。** AF3／Boltz-1 训练切点 2021-09-30，Boltz-2 为 2023-06-01，Chai-1 为 2021-01-12、OpenDDE 未披露。SAbDab2 v0.3.0（2026-10-13）收录的 84 个 VNAR 中，**首次 release 早于对应切点的结构已被训练集见过**，在其上算 DockQ 会系统性偏高；晚于切点的才是干净子集。**处理边界**：按每条链的 PDB 首次 release date 分层，对每个模型按其切点分别报"切点前／切点后"两栏并给分母——切点后子集可能只有个位数，单栏报均值等于没有结论。【核实：各模型切点；推断：泄漏方向】
 
 ---
 
@@ -173,7 +173,7 @@ verified_at: 2026-11-10
 | ---- | ---- | ---- | ---- | ---- |
 | AlphaFold3 | 抗体-抗原共折叠；AF3 系骨干 | atom-token 扩散骨干；pLDDT／PAE／pTM／ipTM | DockQ、界面 lDDT、CDR RMSD | 预测非生成；抗体需 ~1000 seeds【论文自称】 |
 | Boltz-1 / Boltz-2 | 复现 AF3；Boltz-2 带亲和力头 | `full.yaml` 可核实的训练配置；pocket 条件／steering | 同 AF3；亲和力指标仅 Boltz-2 | 切点 2021-09-30 / 2023-06-01 不同，不可混比 |
-| Chai-1 | 单序列／restraint，适合设计闭环 | 单序列 + ESM embedding + restraint 接口 | PoseBusters 77%、CASP15 LDDT 0.849、DockQ 69.8%【论文自称】 | 训练切点未披露【未核实】 |
+| Chai-1 | 单序列／restraint，适合设计闭环 | 单序列 + ESM embedding + restraint 接口 | PoseBusters 77%、CASP15 LDDT 0.849、DockQ 69.8%【论文自称】 | 训练切点 2021-01-12【核实：论文三处】 |
 | RFAA | 非标准残基／共价修饰的表示 | 46 元素 token、键级、显式 R/S | 配体重原子 RMSD、手性合规 | 抗体非主战场；大体系算不动 |
 | Chroma | 可组合条件（对称／子结构／形状） | 能量 conditioner，免重训切换条件 | 设计成功率、晶体 RMSD | 成功率约 3%；不支持小分子 |
 | IgGM | 抗体 CDR 共设计（含 nanobody） | 抗原 + epitope + mask；consistency 降步数 | SAb23H2 RMSD 2.14 Å／lDDT 0.89／DockQ SR 0.467；H3 恢复 36% | 无侧链；抗原刚性 |
