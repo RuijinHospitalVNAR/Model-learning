@@ -5,7 +5,7 @@ family: 结构预测
 granularity: 全原子坐标（聚合物残基 token + 配体每原子 token）
 backbone: Pairformer trunk（48 blocks，pair 128 / single 384）+ 4-block MSA 模块 + atom-level diffusion module（代码默认 24 个 token block）
 generative: 扩散（EDM 噪声调度，x0 参数化，默认 200 步）
-conditioning: MSA | 模板 | 输入序列/聚合物类型 | 配体/离子/修饰残基（CCD）| CCD 共价键；口袋条件需单独微调（待核实）
+conditioning: MSA | 模板 | 输入序列/聚合物类型 | 配体/离子/修饰残基（CCD）| CCD 共价键；口袋条件需另训一套权重（有/无 pocket 两个模型；二源一致，见 §3.3）
 data_scope: PDB ≤2021-09-30；AF2-Multimer v2.3 蒸馏；MSA：UniRef90/UniProt/Uniclust30+BFD/Reduced BFD/MGnify（RNA：Rfam/RNACentral/Nucleotide collection）；测试：Recent PDB 8,856、PoseBusters 428（2019-09-30 重训模型）、CASP15 RNA 10 个靶
 status: 学习中
 verified_at: 2026-11-04
@@ -165,7 +165,7 @@ c_out(σ)  = σ · σ_data / sqrt(σ² + σ_data²)
 | 任意用户自定义共价键 | 正文只承诺 CCD 内的 modifications；非 CCD 共价键是否支持未核实 | 【未核实/推断】 |
 | 二硫键 | 没有显式二硫键约束接口；是否从几何中学到未核实 | 【推断】 |
 | 手性 | 无显式约束；参考构象 `ref_pos` 输入正确手性；只在排序中惩罚 | 【核实：Nature L140】 |
-| 口袋条件 | 团队底稿称需要单独微调一个 pocket-conditioned 模型；正文未逐项核实 | 【未核实（团队底稿转述）】 |
+| 口袋条件 | 需单独微调一个 pocket-conditioned 模型（有/无 pocket 两个权重）；Boltz-1 论文对本机制的描述与团队底稿一致；AF3 原文/SI 未逐项核对，且未公开 pocket 权重 | 【二源一致，非原文核实】 |
 
 **MSA 的必要性**
 
@@ -291,7 +291,7 @@ c_out(σ)  = σ · σ_data / sqrt(σ² + σ_data²)
 
 1. **切点**：AF3 2021-09-30；Boltz-1 同切点；Boltz-2 2023-06-01；Chai-1 2021-01-12；RFAA 未明示统一时间切点。不同切点意味着测试结构可能已进训练集。【核实：专题 02 §2.1】
 2. **采样预算**：AF3 25 样本；Chai-1 默认 5 样本；RFAA 代码示例 T=100/200；Boltz 200 步 × 5 验证样本。样本数不同，top-1 精度不可直接比。【核实：专题 01 §2.4】
-3. **hit rate 分母**：AF3 是结构预测，分母是 benchmark 复合物数（如 PoseBusters 428）；RFAA/BoltzGen/AnewOmni 是设计/湿实验，分母是“每靶候选数 × 靶数”，命中定义、表达系统、筛选通量都不同。75% 与 63.5% 不能横比。【推断，依据专题 03 §2.3 与 §6】
+3. **hit rate 分母**：AF3 是结构预测，分母是 benchmark 复合物数（如 PoseBusters 428）；RFAA/BoltzGen/AnewOmni 是设计/湿实验，分母是“每靶候选数 × 靶数”，命中定义、表达系统、筛选通量都不同。例如 AnewOmni 的 75%（单靶、低通量）与 BoltzGen 的 60%（26 靶、靶级“有 hit 比例”）不能横比。（旧稿举的 Complexa 63.5% 已在一手论文查无、全仓撤下并标【待溯源】，见 `专题/01` 表注 4。）【推断，依据专题 03 §2.3 与 §6】
 4. **指标实现**：PoseBusters 的 RMSD 是否对称校正、DockQ 版本、LDDT 对齐方式、界面残基定义，都会改变数字；必须统一实现。【推断】
 5. **模型版本**：AF3 的 PoseBusters 用 2019 重训模型，开源权重是 2021 切点主模型；直接拿开源权重跑 PoseBusters，可能复现不出论文数字。【核实 + 推断】
 6. **MSA 管线**：各模型的 MSA 生成/配对策略不同；比较时应统一 MSA 或统一单序列模式，否则测的是数据管线不是模型。【推断；与专题 03 §7 V1 同结论】

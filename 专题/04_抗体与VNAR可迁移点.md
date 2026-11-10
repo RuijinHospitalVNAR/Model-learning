@@ -37,7 +37,7 @@ verified_at: 2026-11-10
 | 模型 | 抗体相关能力 | 关键限制 |
 |---|---|---|
 | AlphaFold3（2024） | 抗体-抗原共折叠；AF3 系 atom-token + 坐标扩散的精度基准 | 结构预测而非生成；抗体任务约需 1000 seeds 才饱和【论文自称】 |
-| Boltz-1（2024） | 复现 AF3，支持 pocket 条件与 steering | 无模板；训练分辨率论文 9 Å vs 代码 4.0 Å |
+| Boltz-1（2024） | 复现 AF3，支持 pocket 条件与 steering；pocket 为**单模型**实现（30% 迭代部分揭示），不需另训一套权重 | 无模板；训练分辨率论文 9 Å vs 代码 4.0 Å |
 | Boltz-2（2025） | AF3 式骨干 + affinity 头 | 切点 2023-06-01，亲和力指标不可与 AF3 横比 |
 | Chai-1（2024） | 单序列／ESM embedding／restraint，抗体场景可少依赖 MSA | 训练切点 2021-01-12【核实：论文三处】 |
 | IgGM（2025） | 唯一开放权重、支持 nanobody 的抗体 CDR 共设计；抗原 + epitope + mask | 只生成 Cα + SO(3) frame，**无侧链**，不算全原子；抗原刚性假设 |
@@ -141,7 +141,7 @@ verified_at: 2026-11-10
 | CDR-H3 RMSD | CDR 环几何 | 先声明是否只比主链（IgGM 无侧链） |
 | 序列恢复率（recovery） | 逆折叠／序列设计 | AntiBMPNN / AbMPNN 口径需核对 |
 | 物理有效性（手性、键长、clash、二硫键几何） | 抗体场景的硬约束 | AF3 自报 4.4% 手性违规；二硫键多数模型无显式监督 |
-| 湿实验 hit rate | 最终判据 | 必须给每靶候选数与分母；"75%"与"63.5%"不可直接横比 |
+| 湿实验 hit rate | 最终判据 | 必须给每靶候选数与分母；不同工作的 hit 数字不可直接横比 |
 
 **不能借用为"全原子"证据的指标**：仅主链／Cα 的 RMSD、仅 in-silico 的 designability（见 03 §3 与 §7 V8／V9 的判据设计）。
 
@@ -172,7 +172,7 @@ verified_at: 2026-11-10
 | 模型 | 抗体相关能力 | 可复用模块 | 可借用指标 | 限制 |
 | ---- | ---- | ---- | ---- | ---- |
 | AlphaFold3 | 抗体-抗原共折叠；AF3 系骨干 | atom-token 扩散骨干；pLDDT／PAE／pTM／ipTM | DockQ、界面 lDDT、CDR RMSD | 预测非生成；抗体需 ~1000 seeds【论文自称】 |
-| Boltz-1 / Boltz-2 | 复现 AF3；Boltz-2 带亲和力头 | `full.yaml` 可核实的训练配置；pocket 条件／steering | 同 AF3；亲和力指标仅 Boltz-2 | 切点 2021-09-30 / 2023-06-01 不同，不可混比 |
+| Boltz-1 / Boltz-2 | 复现 AF3；Boltz-2 带亲和力头 | `full.yaml` 可核实的训练配置；pocket 条件／steering（单模型，AF3 则需另训有／无 pocket 两套） | 同 AF3；亲和力指标仅 Boltz-2 | 切点 2021-09-30 / 2023-06-01 不同，不可混比 |
 | Chai-1 | 单序列／restraint，适合设计闭环 | 单序列 + ESM embedding + restraint 接口 | PoseBusters 77%、CASP15 LDDT 0.849、DockQ 69.8%【论文自称】 | 训练切点 2021-01-12【核实：论文三处】 |
 | RFAA | 非标准残基／共价修饰的表示 | 46 元素 token、键级、显式 R/S | 配体重原子 RMSD、手性合规 | 抗体非主战场；大体系算不动 |
 | Chroma | 可组合条件（对称／子结构／形状） | 能量 conditioner，免重训切换条件 | 设计成功率、晶体 RMSD | 成功率约 3%；不支持小分子 |
@@ -184,7 +184,7 @@ verified_at: 2026-11-10
 | TorchCraft | 冻结 AF3 的 test-time 优化 | 序列 logits + CDR 限定；无需训练 | 4/4 minibinder、4/4 VHH | 单靶耗时；置信度自洽偏差 |
 | OpenDDE | AF3 家族全原子共折叠（含抗体-抗原）；Ab-Ag benchmark 有 top-rank／oracle 双线 | structural token 角色分解；shape-complementarity loss；统一 masked 生成 | DockQ ≥0.23；top-rank 与 oracle 需同时报 | 非序列设计；abag checkpoint 在纳米抗体上劣于 general【内部记录】；preview 跨版本不复现 |
 | SeedProteo | AF3 式 atom14 + MRF 解码 | 靶标口袋条件 | 2 靶 70–80% hit、pM 级【未核实】 | 仅 2 靶，证据薄 |
-| Proteina-Complexa | 全原子 binder（非 Ig） | 潜空间 flow matching + test-time search | 133 靶、>1M 候选、最高 63.5% hit【论文自称】 | 不做抗体 |
+| Proteina-Complexa | 全原子 binder（非 Ig） | 潜空间 flow matching + test-time search | 19 个 in-silico 靶标（23 候选筛到 19）、桥接实验、无湿实验【核实：论文全文】；原「133 靶／>1M 候选／63.5% hit／碳水化合物 binder」一手论文查无，已撤【待溯源，见 `01` 表注 4】 | 不做抗体 |
 | RFD4-Proteina | 全原子 de novo（残基级 32 维隐变量 + 130M 解码器）；自带 partial diffusion 局部重设计 | 双模态并行流匹配；`examples/antibody_design/`（VHH 4 框架 × 2 靶）；beam search + AF3/AF2 oracle | 蛋白 binder 10.6%／小分子 14.3%／AME 12.1%／DNA 3.5%【核实】；湿实验 158/188 | 无 pLDDT／PAE 头，不能当预测器；抗体数据占比未披露；搜索负收益（普通判据 naive 41.0 > temporal 25.1） |
 
 ---

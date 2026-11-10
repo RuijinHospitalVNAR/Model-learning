@@ -299,7 +299,7 @@ Teddymer 不是 Proteina 的数据集，而是 Proteina-Complexa 的预训练集
 1. **designability 是 best-of-8**：每个 backbone 生成 8 条序列，取最低 scRMSD 判 <2 Å。若对手用 best-of-1 或取平均，两者不可比；差的不是模型而是选择协议。【推断：依据 App. F.1】
 2. **主表只统计 designable 样本**："5 长度 × 100 designable"意味着先按 designability 筛再统计，因此主表的 diversity/novelty 是**条件于可设计性**的分布，而 Table 3 的全分布数字（designability 19.0–44.2%）才是无过滤口径。两个表不能混用。【核实：Table 1 表注与 Table 3 表头】
 3. **主表是调参后的最优配置**：表注写明所有模型都为最大化 designability 调过参；这不是 held-out 排名。【核实：Table 1 表注】
-4. **hit rate 不适用于本篇**：Proteina 没有 binder 任务，也没有"每靶命中率"。仓库若出现"Proteina hit rate 63.5%"，那是 Proteina-Complexa 的**单靶**（PDGFR）湿实验数字，分母是 122/191 的送检设计数，不是 133 靶平均，也不是每候选。【核实：Complexa 项目页；冲突裁决见本篇 §3.7、§5.1】
+4. **hit rate 不适用于本篇**：Proteina 没有 binder 任务，也没有"每靶命中率"。仓库若出现"Proteina hit rate 63.5%"，那是 Proteina-Complexa 的旧数字——**该数字在一手论文中查无，已全仓撤下并标【待溯源】**（唯一登记处：`专题/01` 表注 4）；Complexa 项目页虽给出过单靶（PDGFR）122/191 的送检命中数，但论文正文无此口径，不能作为可引用指标。需要 hit rate 时一律转 `专题/03` §4 的可核实列。【待溯源；冲突裁决见本篇 §3.7、§5.1】
 
 - **"unique successes" 的分母**：motif 表中 `0.82 (121)` 这类括号内数字是**该 task 的 unique successes 数**，unique 指 Foldseek TM 0.6 单连接聚类后的簇数，分母是每 task 的 1000 条 backbone。它同时做了"按靶"与"去重"两层归一，与其他模型的"每候选命中率"不可直接换算。【核实：App. B.2】
 

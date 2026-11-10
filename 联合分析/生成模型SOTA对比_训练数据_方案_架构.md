@@ -190,7 +190,7 @@ BoltzGen 与 RFD4-Proteina 的共同点不是"都用了扩散"，而是**训练�
 | 模型 | 生成侧表征 | 输出能否重建重原子 | 是否一步全原子 |
 | --- | --- | --- | --- |
 | RFD4-Proteina | Cα + 32 维 latent | 能（AE 37 槽 + presence mask） | 否；潜变量+解码 |
-| Proteina | Cα only（3/残基，无 latent） | 能（Cα 骨架经 MPNN + refold 补全；生成端只出 Cα） | 否；Cα 流 + 外挂补全 |
+| Proteina | Cα only（3/残基，无 latent） | **否**——生成端只出 Cα（`x∈R^{3L}`）；经下游 MPNN + refold 补齐后才有重原子，**不计为模型输出** | 否；Cα 流 + 外挂补全 |
 | La-Proteina | Cα + 8 维 latent | 能（36 槽 + 20 类身份） | 否；潜变量+解码 |
 | Proteina-Complexa | binder Cα + 8 维 latent；target Atom37 | 能（binder 侧走 La-Proteina 解码） | 否；潜变量+解码 |
 | Chroma | 主链 4 原子 + χ + 序列 | 能（χ 显式） | 否；序列/χ 由 design network 单独出 |
@@ -360,7 +360,7 @@ ESM3 是离散 token 上的掩码语言模型：序列、二级结构、三级�
 
 ## 9. 三条最实质的差异（结论）
 
-1. **"全原子"不是同一件事，真正的分界是生成端自由度。** SeedProteo 是 atom14 直接扩散；La-Proteina/Complexa/RFD4/AnewOmni 是"Cα/block + latent + 解码"；APM 是 frame+torsion；Chroma 是主链+χ+独立 design network；BoltzGen 是主链扩散+IF 补侧链；Proteina/IgGM/ESM3 生成端只有主链（Proteina 的全原子靠外挂补全）。即便输出都能"重建重原子"（含外挂补全），采样成本、侧链多样性、序列-结构耦合方式也完全不同。
+1. **"全原子"不是同一件事，真正的分界是生成端自由度。** SeedProteo 是 atom14 直接扩散；La-Proteina/Complexa/RFD4/AnewOmni 是"Cα/block + latent + 解码"；APM 是 frame+torsion；Chroma 是主链+χ+独立 design network；BoltzGen 是主链扩散+IF 补侧链；Proteina/IgGM/ESM3 生成端只有主链（Proteina 判为**仅主链**，2026-11-10 定论：只输出 `x∈R^{3L}`，侧链靠外挂 MPNN/refold 补，不计为模型输出，见 `专题/01` §2.2 与表注 2）。即便输出都能"重建重原子"（含外挂补全），采样成本、侧链多样性、序列-结构耦合方式也完全不同。
 
 2. **"design = 条件补全"与"从头生成"是两个任务，不是两种实现。** BoltzGen/RFD4 用随机 mask 把 folding、binder、motif 压成 `p(缺失|上下文)`；Proteina/La-Proteina/Chroma 学 `p(结构)` 再用 guidance/inpainting 注入条件。更细的分叉是**序列是否在生成环内**：RFD4 的 latent 解身份，BoltzGen 的序列靠 IF。把两者都叫"全原子生成"会掩盖最重要的差别。
 
