@@ -9,11 +9,11 @@ verified_at: 2026-11-10
 # 抗体与 VNAR 可迁移点
 
 > **研究轴**：抗体/纳米抗体场景下的可复用模块、数据、指标与工程约束
-> **关联模型篇章**：[01_全原子表示与生成范式](01_全原子表示与生成范式.md)、[02_训练数据构成与切分](02_训练数据构成与切分.md)、[03_评测体系与可复现性](03_评测体系与可复现性.md)；七篇模型篇章——[AlphaFold3](../模型篇章/AlphaFold3/README.md)、[Mol-1](../模型篇章/Mol-1/README.md)、[Proteina](../模型篇章/Proteina/README.md)、[AnewOmni](../模型篇章/AnewOmni/README.md)、[Pallatom2](../模型篇章/Pallatom2/README.md)、[OpenDDE](../模型篇章/OpenDDE/README.md)、[ATOMICA](../模型篇章/ATOMICA/README.md)
+> **关联模型篇章**：[01_全原子表示与生成范式](01_全原子表示与生成范式.md)、[02_训练数据构成与切分](02_训练数据构成与切分.md)、[03_评测体系与可复现性](03_评测体系与可复现性.md)；八篇模型篇章——[AlphaFold3](../模型篇章/AlphaFold3/README.md)、[Mol-1](../模型篇章/Mol-1/README.md)、[Proteina](../模型篇章/Proteina/README.md)、[AnewOmni](../模型篇章/AnewOmni/README.md)、[Pallatom2](../模型篇章/Pallatom2/README.md)、[OpenDDE](../模型篇章/OpenDDE/README.md)、[ATOMICA](../模型篇章/ATOMICA/README.md)、[RFD4-Proteina](../模型篇章/RFD4-Proteina/README.md)
 > **记录人**：待填
 > **最后更新**：2026-11-10
 
-> 本篇原为主文档 §6「对 VNAR 全原子设计的可复用点与风险（压缩节）」的压缩回填，并补充主文档 §3.5 的抗体数据与 §5 准则 10。**2026-11-10 收口**：改为用七篇模型篇章的已核实结论写实，产出四份可执行清单（数据底数 → 角色分工 → 四个坑 → 下一步），不再做倡议式叙述。
+> 本篇原为主文档 §6「对 VNAR 全原子设计的可复用点与风险（压缩节）」的压缩回填，并补充主文档 §3.5 的抗体数据与 §5 准则 10。**2026-11-10 收口**：改为用八篇模型篇章的已核实结论写实，产出四份可执行清单（数据底数 → 角色分工 → 四个坑 → 下一步），不再做倡议式叙述。
 > **不补造实验或数字**：凡原文标【推断】【未核实】【论文自称】的，此处保留同一标记；新增的量化只来自已入仓的模型篇章与 02／03 专题。
 
 ---
@@ -113,9 +113,9 @@ verified_at: 2026-11-10
   2. **不是 KD 预测器**：`ptm-binder` 是 binder **单链折叠置信度**，不是界面或亲和力置信度；界面不确定性要看 `min-ipAE`，亲和力只能靠湿实验。【核实】
 - **完整论证与数据出处**：[模型篇章/Pallatom2](../模型篇章/Pallatom2/README.md) §4、§6。
 
-### 3.5 七篇模型在 VNAR 流程里的角色分工（收口新增）
+### 3.5 八篇模型在 VNAR 流程里的角色分工（收口新增）
 
-七篇覆盖四个不可互相替代的角色。**同一个模型只归一个角色**：能做预测的模型未必能评估，能生成的模型未必能做局部改造。
+八篇覆盖四个不可互相替代的角色。**同一个模型只归一个角色**：能做预测的模型未必能评估，能生成的模型未必能做局部改造。
 
 | 角色 | 模型 | 在 VNAR 流程里能做什么 | 不能做什么（硬边界） | 证据 |
 |---|---|---|---|---|
@@ -125,9 +125,10 @@ verified_at: 2026-11-10
 | **评估器**（唯一，且是判别式） | ATOMICA | 把 VNAR–抗原当蛋白–蛋白界面编码；`z_interface` 做表位相似性检索，ATOMICAScore 做接触位点归因 | 不生成、不给亲和力；无氢／电荷／键级，CDR 柔性未建模；抗体占比未披露 | [ATOMICA 篇章](../模型篇章/ATOMICA/README.md) |
 | **局部重设计**（唯一有湿实验闭环） | Pallatom2 | `norepack` 锁框架侧链 + `redesign` 放开 CDR + partial diffusion（t=0.2 起步、0.3 加强）；`min-ipAE + ptm-binder` 筛选；PB-272 → PB-276/277 是存在性证明 | 不是 de novo 生成器（语料不含 Ig 折叠、无 VNAR 条件接口）；`ptm-binder` 不是 KD 预测器 | §3.4 |
 | **de novo 生成器** | AnewOmni | 原子 block + VAE 潜空间；graph prompt 支持纳米抗体／环化／非天然残基／锚定；报 KRAS G12D 纳米抗体湿实验 | 预印本；侧链为 block 解码；通量与成功率低，抗体只到 CDR／纳米抗体 | §2 表 |
+| **de novo 生成器**（全原子，且自带局部重设计） | RFD4-Proteina | 残基级 32 维隐变量 + 130M 全原子解码器；仓库带 `examples/antibody_design/vhh/`（4 框架 × 2 靶）；`partial.yaml` 从第 35/60 步加噪，可锁 framework 只重画 CDR | 不能当预测器（无 pLDDT／PAE 头，评估必须外挂 AF3／AF2）；抗体／纳米抗体在训练集中的占比未披露；二硫键模式未显式建模；无 VNAR 湿实验 | [RFD4-Proteina 篇章](../模型篇章/RFD4-Proteina/README.md) §6.2 |
 | **主链草稿**（不构成全原子路径） | Proteina | Cα flow matching 出主链，可接逆折叠补序列 | 无侧链、无抗体先验，在 VNAR 上无任何验证；不能算 VNAR 全原子生成方案 | [01 §6](01_全原子表示与生成范式.md)（粒度＝Cα 单点） |
 
-**这四条角色的组合方式**（也是本篇的唯一推荐链路）：OpenDDE／AF3 预测 → ATOMICA 做界面评估与接触归因 → Pallatom2 对命中复合物做局部重设计 → 湿实验。AnewOmni 只在"新靶点、没有起始复合物"时才进入链路；Proteina 不进入 VNAR 链路，保留在 01 的谱系里说明 Cα 级方案的边界。
+**这四条角色的组合方式**（也是本篇的唯一推荐链路）：OpenDDE／AF3 预测 → ATOMICA 做界面评估与接触归因 → Pallatom2 对命中复合物做局部重设计 → 湿实验。AnewOmni 与 RFD4-Proteina 只在"新靶点、没有起始复合物"时才进入链路（前者偏小分子／肽的统一建模，后者偏全原子 de novo 且自带 partial diffusion 局部重设计）；Proteina 不进入 VNAR 链路，保留在 01 的谱系里说明 Cα 级方案的边界。
 
 ---
 
@@ -184,6 +185,7 @@ verified_at: 2026-11-10
 | OpenDDE | AF3 家族全原子共折叠（含抗体-抗原）；Ab-Ag benchmark 有 top-rank／oracle 双线 | structural token 角色分解；shape-complementarity loss；统一 masked 生成 | DockQ ≥0.23；top-rank 与 oracle 需同时报 | 非序列设计；abag checkpoint 在纳米抗体上劣于 general【内部记录】；preview 跨版本不复现 |
 | SeedProteo | AF3 式 atom14 + MRF 解码 | 靶标口袋条件 | 2 靶 70–80% hit、pM 级【未核实】 | 仅 2 靶，证据薄 |
 | Proteina-Complexa | 全原子 binder（非 Ig） | 潜空间 flow matching + test-time search | 133 靶、>1M 候选、最高 63.5% hit【论文自称】 | 不做抗体 |
+| RFD4-Proteina | 全原子 de novo（残基级 32 维隐变量 + 130M 解码器）；自带 partial diffusion 局部重设计 | 双模态并行流匹配；`examples/antibody_design/`（VHH 4 框架 × 2 靶）；beam search + AF3/AF2 oracle | 蛋白 binder 10.6%／小分子 14.3%／AME 12.1%／DNA 3.5%【核实】；湿实验 158/188 | 无 pLDDT／PAE 头，不能当预测器；抗体数据占比未披露；搜索负收益（普通判据 naive 41.0 > temporal 25.1） |
 
 ---
 
